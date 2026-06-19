@@ -1,0 +1,6 @@
+{
+  "name": "Kalkulator Nutrisi Bekal Sekolah",
+  "description": "Aplikasi edukatif pengukur keseimbangan gizi bekal sekolah anak.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
