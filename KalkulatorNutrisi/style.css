@@ -1,0 +1,83 @@
+/* 
+  Kalkulator Nutrisi Bekal Sekolah
+  Gaya Kustom Tambahan (Custom CSS)
+  Aplikasi ini menggunakan Tailwind CSS melalui CDN sebagai basis kerangka UI.
+  File CSS ini menyempurnakan aspek visual pendukung, efek cetak, dan transisi halus.
+*/
+
+/* Animasi Masuk Halus (Fade-in-up) */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Transisi Halus Lintas Mode Gelap (Dark Mode) */
+body {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Penyesuaian Scrollbar Grid List Makanan agar tetap serasi */
+#foodListContainer::-webkit-scrollbar {
+  width: 4px;
+}
+#foodListContainer::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 4px;
+}
+#foodListContainer::-webkit-scrollbar-thumb {
+  background: rgba(16, 185, 129, 0.3); /* Emerald green translucent */
+  border-radius: 4px;
+}
+#foodListContainer::-webkit-scrollbar-thumb:hover {
+  background: rgba(16, 185, 129, 0.5);
+}
+
+/* Dukungan Cetak (Print Stylesheet) */
+/* Saat pengguna menekan "Cetak Laporan PDF" menggunakan pencetak browser bawaan */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 12pt;
+  }
+  
+  nav, 
+  #backToInputBtn, 
+  #saveToHistoryBtn, 
+  #exportPdfBtn, 
+  #finishAnalysisBtn, 
+  #themeToggleBtn, 
+  #clearHistoryBtn {
+    display: none !important; /* Sembunyikan tombol-tombol saat dicetak */
+  }
+
+  main {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .shadow-xl, .shadow-sm, .shadow-md {
+    box-shadow: none !important;
+    border: 1px solid #e2e8f0 !important;
+  }
+
+  /* Tampilkan hanya bagian hasil analisis gizi */
+  #screenResults {
+    display: block !important;
+  }
+
+  #screenHome, #screenInput {
+    display: none !important;
+  }
+}

@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kalkulator Nutrisi Bekal Sekolah</title>
+  <!-- Load Tailwind CSS via CDN untuk styling modern dan cepat -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Load Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Load FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- jsPDF untuk export laporan gizi ke PDF secara instan offline -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    /* Kustomisasi scrollbar halus */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+  <script>
+    // Konfigurasi Tailwind untuk support tema mode gelap kustom
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            school: {
+              lightBg: '#F9FBE7',
+              darkBg: '#121212',
+              primary: '#4CAF50',
+              secondary: '#00ACC1',
+              darkSurface: '#1E1E1E'
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-school-lightBg dark:bg-school-darkBg text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-300">
+
+  <!-- TOP APP BAR -->
+  <nav class="bg-white dark:bg-zinc-900 border-b border-slate-200 dark:border-zinc-800 sticky top-0 z-50 transition-colors">
+    <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center space-x-2">
+        <span class="text-2xl">🎒</span>
+        <span class="font-extrabold text-lg bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent">Bekal Sehat</span>
+      </div>
+      <div class="flex items-center space-x-4">
+        <!-- Tombol Mode Gelap/Terang -->
+        <button id="themeToggleBtn" class="p-2 rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-amber-400 hover:scale-105 transition-transform" title="Ganti Tema">
+          <i class="fa-solid fa-moon text-lg" id="themeIcon"></i>
+        </button>
+        <!-- Tombol Beranda -->
+        <button id="navHomeBtn" class="p-2 rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-slate-200 hover:scale-105 transition-transform hidden" title="Ke Beranda">
+          <i class="fa-solid fa-house"></i>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- CONTAINER UTAMA -->
+  <main class="max-w-3xl mx-auto px-4 py-6">
+    
+    <!-- LAYAR 1: HALAMAN BERANDA (HOME SCREEN) -->
+    <section id="screenHome" class="space-y-6">
+      <!-- Welcome Hero Card -->
+      <div class="bg-white dark:bg-zinc-900 rounded-3xl p-6 shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-zinc-800 transition-all text-center">
+        <!-- Maskot Ilustrasi Sederhana CSS / Emoji Box -->
+        <div class="w-36 h-36 mx-auto bg-emerald-50 dark:bg-emerald-950/30 rounded-full flex items-center justify-center border-4 border-emerald-500 animate-bounce duration-1000">
+          <span class="text-7xl">🍱</span>
+        </div>
+        
+        <h1 class="text-2xl md:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-6 leading-tight">
+          Kalkulator Nutrisi Bekal Sekolah
+        </h1>
+        <p class="text-slate-500 dark:text-slate-400 text-sm md:text-base max-w-md mx-auto mt-3">
+          "Hitung kandungan gizi bekal sekolahmu dengan mudah secara instan offline agar tumbuh seimbang & berprestasi!"
+        </p>
+
+        <div class="mt-8">
+          <button id="startCalculateBtn" class="w-full md:w-auto bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-teal-500 text-white font-bold px-8 py-4 rounded-2xl shadow-lg shadow-emerald-500/20 active:scale-95 transition-all text-base flex items-center justify-center space-x-2 mx-auto">
+            <span>Mulai Hitung Bekal Gizi</span>
+            <span class="text-lg">🎒</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Tips Edukasi Gizi Sehat -->
+      <div class="bg-amber-50 dark:bg-amber-950/20 rounded-2xl p-4 border border-amber-200 dark:border-amber-900/30 flex items-start space-x-3">
+        <span class="text-xl mt-0.5">💡</span>
+        <div>
+          <h4 class="font-bold text-amber-800 dark:text-amber-400 text-sm">Tips Edukasi Bekal Sehat:</h4>
+          <p class="text-amber-700 dark:text-amber-300 text-xs leading-relaxed mt-1">
+            Bekal sekolah yang baik harus seimbang! Terdiri dari Karbohidrat untuk energi belajar, Lauk Protein untuk pertumbuhan otak & otot, serta Sayuran dan Buah yang kaya Vitamin serta Serat alami pencegah lemas.
+          </p>
+        </div>
+      </div>
+
+      <!-- Daftar Riwayat Penyimpanan -->
+      <div class="space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="font-extrabold text-base text-slate-700 dark:text-slate-300 flex items-center space-x-2">
+            <span>Riwayat Catatan Bekal</span>
+            <span class="bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 text-xs px-2.5 py-0.5 rounded-full" id="historyCount">0</span>
+          </h3>
+          <button id="clearHistoryBtn" class="text-red-500 dark:text-red-400 hover:text-red-600 text-xs font-bold flex items-center space-x-1 hidden transition-colors">
+            <i class="fa-regular fa-trash-can"></i>
+            <span>Hapus Semua</span>
+          </button>
+        </div>
+
+        <!-- Wadah List Riwayat -->
+        <div id="historyContainer" class="space-y-3">
+          <!-- Item Riwayat akan disisipkan di sini oleh JS -->
+          <div class="bg-slate-100 dark:bg-zinc-900/50 rounded-2xl p-6 text-center text-slate-400 dark:text-slate-500 text-xs border border-dashed border-slate-300 dark:border-zinc-800">
+            <i class="fa-solid fa-clock-rotate-left text-2xl mb-2"></i>
+            <p>Belum ada riwayat perhitungan gizi tersimpan.</p>
+            <p class="text-slate-400/70 mt-1">Selesaikan kalkulasi lalu simpan riwayat untuk melihat catatan di sini.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LAYAR 2: INPUT DATA MAKANAN (INPUT SCREEN) -->
+    <section id="screenInput" class="space-y-6 hidden">
+      <!-- Input Judul Bekal -->
+      <div class="bg-white dark:bg-zinc-900 rounded-2xl p-5 shadow-sm border border-slate-200 dark:border-zinc-800">
+        <label for="lunchTitleInput" class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wide">Nama / Penanda Bekal Sekolah</label>
+        <div class="relative">
+          <span class="absolute left-4 top-3 text-slate-400"><i class="fa-solid fa-pen-clip"></i></span>
+          <input type="text" id="lunchTitleInput" class="w-full bg-slate-50 dark:bg-zinc-800/80 border border-slate-200 dark:border-zinc-700 rounded-xl py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800 dark:text-slate-100 font-bold" value="Bekal Sekolahku">
+        </div>
+      </div>
+
+      <!-- Pencarian dan Filter Kategori Makanan -->
+      <div class="bg-white dark:bg-zinc-900 rounded-2xl p-5 shadow-sm border border-slate-200 dark:border-zinc-800 space-y-4">
+        <div class="relative">
+          <span class="absolute left-4 top-3.5 text-slate-400"><i class="fa-solid fa-magnifying-glass"></i></span>
+          <input type="text" id="searchFoodInput" class="w-full bg-slate-50 dark:bg-zinc-800/80 border border-slate-200 dark:border-zinc-700 rounded-xl py-3 pl-10 pr-4 text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="Cari nama makanan (nasi, ayam, apel...)...">
+        </div>
+
+        <!-- Filter Kategori Chip (Sesuai Butir 2) -->
+        <div>
+          <span class="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-2">Filter Kategori Makanan:</span>
+          <div class="flex flex-wrap gap-2" id="categoryChipsContainer">
+            <button class="category-chip active px-3.5 py-1.5 rounded-full text-xs font-bold bg-emerald-500 text-white transition-all" data-category="all">
+              Semua Makanan
+            </button>
+            <button class="category-chip px-3.5 py-1.5 rounded-full text-xs font-bold bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-zinc-700 transition-all" data-category="Karbohidrat">
+              🍚 Karbohidrat
+            </button>
+            <button class="category-chip px-3.5 py-1.5 rounded-full text-xs font-bold bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-zinc-700 transition-all" data-category="Protein">
+              🍗 Protein
+            </button>
+            <button class="category-chip px-3.5 py-1.5 rounded-full text-xs font-bold bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-zinc-700 transition-all" data-category="Sayuran">
+              🥦 Sayuran
+            </button>
+            <button class="category-chip px-3.5 py-1.5 rounded-full text-xs font-bold bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-zinc-700 transition-all" data-category="Buah">
+              🍎 Buah
+            </button>
+            <button class="category-chip px-3.5 py-1.5 rounded-full text-xs font-bold bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-zinc-700 transition-all" data-category="Minuman">
+              🥛 Minuman
+            </button>
+            <button class="category-chip px-3.5 py-1.5 rounded-full text-xs font-bold bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-zinc-700 transition-all" data-category="Snack">
+              🍪 Snack
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- List Makanan Tersedia & Form Kustom -->
+      <div class="space-y-3">
+        <div class="flex items-center justify-between px-1">
+          <h3 class="font-extrabold text-sm text-slate-700 dark:text-slate-300">Pilih Lauk Gizi Bekal:</h3>
+          <!-- Trigger Tambah Makanan Kustom -->
+          <button id="openCustomFoodModalBtn" class="text-emerald-500 dark:text-emerald-400 hover:underline text-xs font-bold flex items-center space-x-1">
+            <i class="fa-solid fa-circle-plus"></i>
+            <span>Tambah Makanan Kustom</span>
+          </button>
+        </div>
+
+        <!-- Wadah List Grid Makanan -->
+        <div id="foodListContainer" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[280px] overflow-y-auto pr-1">
+          <!-- Item makanan di-render di sini oleh script.js -->
+        </div>
+      </div>
+
+      <!-- Ringkasan Floating Bekal Saat Ini -->
+      <div class="bg-gradient-to-r from-emerald-600 to-teal-600 dark:from-emerald-700 dark:to-teal-700 rounded-2xl p-5 shadow-lg text-white space-y-4">
+        <div class="flex items-center justify-between border-b border-white/20 pb-3">
+          <span class="text-xs font-bold tracking-wider uppercase">Isi Kotak Bekal Saat Ini:</span>
+          <button id="resetLunchboxBtn" class="bg-white/10 hover:bg-white/20 text-white rounded-lg px-2.5 py-1 text-[10px] font-bold uppercase transition-colors">
+            Kosongkan Kotak 🔄
+          </button>
+        </div>
+
+        <!-- List Lauk Mini -->
+        <div id="lunchboxMiniItems" class="flex flex-wrap gap-2 min-h-[30px] text-xs">
+          <p class="text-white/60 italic text-xs">Belum ada makanan yang dimasukkan. Klik list makanan di atas!</p>
+        </div>
+
+        <div class="flex items-center justify-between pt-2">
+          <div>
+            <span class="block text-[10px] text-white/70 uppercase font-bold tracking-wider">Estimasi Energi:</span>
+            <span class="text-2xl font-black" id="miniTotalCalories">0</span> <span class="text-xs">kkal</span>
+          </div>
+          <button id="viewAnalysisBtn" class="bg-white text-emerald-700 dark:text-emerald-800 font-bold px-5 py-2.5 rounded-xl hover:bg-emerald-50 active:scale-95 transition-all text-xs flex items-center space-x-1 disabled:opacity-50 disabled:pointer-events-none" disabled>
+            <span>Buka Laporan Analisis</span>
+            <i class="fa-solid fa-chart-pie"></i>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- LAYAR 3: LAPORAN HASIL & ANALISIS GIZI -->
+    <section id="screenResults" class="space-y-6 hidden">
+      <!-- Tombol Kembali -->
+      <button id="backToInputBtn" class="text-slate-500 dark:text-slate-400 hover:text-emerald-500 text-xs font-bold flex items-center space-x-1.5">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span>Kembali Edit Menu Bekal</span>
+      </button>
+
+      <!-- CARD UTAMA STATUS PENILAIAN (Sesuai Butir 4 & 5) -->
+      <div id="evaluationScoreCard" class="bg-white dark:bg-zinc-900 rounded-3xl p-6 shadow-xl border-t-8 border-emerald-500 text-center space-y-3">
+        <span class="text-xs font-bold text-slate-400 dark:text-slate-500 tracking-wider uppercase">Skor Gizi Bekal Sekolah</span>
+        <h2 id="evaluationScoreTitle" class="text-3xl font-black tracking-tight text-emerald-600">Bekal Sangat Bergizi</h2>
+        <p id="evaluationScoreSubtitle" class="text-slate-500 dark:text-slate-400 text-xs md:text-sm max-w-sm mx-auto leading-relaxed">
+          Sangat Seimbang! Bekal anak sudah lengkap memenuhi kebutuhan kalori, karbohidrat, protein, serta serat gizi sayuran.
+        </p>
+      </div>
+
+      <!-- GRID TOTAL NUTRISI (Sesuai Butir 3 & 5) -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <!-- Kalori -->
+        <div class="bg-orange-50/50 dark:bg-orange-950/10 p-4 rounded-2xl border border-orange-100 dark:border-orange-900/20 text-center">
+          <span class="text-xl">🔥</span>
+          <span class="block text-[10px] font-bold text-orange-600 uppercase tracking-wider mt-1">Energi / Kalori</span>
+          <span class="text-xl font-extrabold text-slate-800 dark:text-slate-100 block mt-1" id="resCalories">0</span>
+          <span class="text-[9px] text-slate-400">kkal (Kebutuhan ideal)</span>
+        </div>
+        <!-- Protein -->
+        <div class="bg-emerald-50/50 dark:bg-emerald-950/10 p-4 rounded-2xl border border-emerald-100 dark:border-emerald-900/20 text-center">
+          <span class="text-xl">🍗</span>
+          <span class="block text-[10px] font-bold text-emerald-600 uppercase tracking-wider mt-1">Protein</span>
+          <span class="text-xl font-extrabold text-slate-800 dark:text-slate-100 block mt-1" id="resProtein">0</span>
+          <span class="text-[9px] text-slate-400">g (Membangun otot)</span>
+        </div>
+        <!-- Karbohidrat -->
+        <div class="bg-blue-50/50 dark:bg-blue-950/10 p-4 rounded-2xl border border-blue-100 dark:border-blue-900/20 text-center">
+          <span class="text-xl">🍚</span>
+          <span class="block text-[10px] font-bold text-blue-600 uppercase tracking-wider mt-1">Karbohidrat</span>
+          <span class="text-xl font-extrabold text-slate-800 dark:text-slate-100 block mt-1" id="resCarbs">0</span>
+          <span class="text-[9px] text-slate-400">g (Sumber tenaga)</span>
+        </div>
+        <!-- Lemak -->
+        <div class="bg-amber-50/50 dark:bg-amber-950/10 p-4 rounded-2xl border border-amber-100 dark:border-amber-900/20 text-center">
+          <span class="text-xl">🥑</span>
+          <span class="block text-[10px] font-bold text-amber-600 uppercase tracking-wider mt-1">Lemak Total</span>
+          <span class="text-xl font-extrabold text-slate-800 dark:text-slate-100 block mt-1" id="resFat">0</span>
+          <span class="text-[9px] text-slate-400">g (Kesehatan sel)</span>
+        </div>
+      </div>
+
+      <!-- PROGRESS BAR KEBUTUHAN NUTRISI (Sesuai Butir 5) -->
+      <div class="bg-white dark:bg-zinc-900 rounded-2xl p-5 shadow-sm border border-slate-200 dark:border-zinc-800 space-y-4">
+        <h3 class="font-extrabold text-xs text-slate-500 uppercase tracking-wider">Persentase Pemenuhan Gizi Harian Bekal Sekolah:</h3>
+        
+        <!-- Kalori Progress -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between text-xs font-bold">
+            <span class="text-slate-600 dark:text-slate-300">🔥 Energi (Ideal 400 - 650 kkal)</span>
+            <span id="pctCaloriesText">0%</span>
+          </div>
+          <div class="w-full bg-slate-100 dark:bg-zinc-800 rounded-full h-3 overflow-hidden">
+            <div id="pctCaloriesBar" class="bg-orange-500 h-full transition-all duration-500" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <!-- Protein Progress -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between text-xs font-bold">
+            <span class="text-slate-600 dark:text-slate-300">🍗 Lauk Protein (Ideal > 12 g)</span>
+            <span id="pctProteinText">0%</span>
+          </div>
+          <div class="w-full bg-slate-100 dark:bg-zinc-800 rounded-full h-3 overflow-hidden">
+            <div id="pctProteinBar" class="bg-emerald-500 h-full transition-all duration-500" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <!-- Karbohidrat Progress -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between text-xs font-bold">
+            <span class="text-slate-600 dark:text-slate-300">🍚 Karbohidrat (Ideal 50 - 90 g)</span>
+            <span id="pctCarbsText">0%</span>
+          </div>
+          <div class="w-full bg-slate-100 dark:bg-zinc-800 rounded-full h-3 overflow-hidden">
+            <div id="pctCarbsBar" class="bg-blue-500 h-full transition-all duration-500" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <!-- Serat Progress -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between text-xs font-bold">
+            <span class="text-slate-600 dark:text-slate-300">🥦 Serat Pangan &amp; Vitamin (Ideal > 1.5 g)</span>
+            <span id="pctFiberText">0%</span>
+          </div>
+          <div class="w-full bg-slate-100 dark:bg-zinc-800 rounded-full h-3 overflow-hidden">
+            <div id="pctFiberBar" class="bg-purple-500 h-full transition-all duration-500" style="width: 0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DETAIL MAKANAN YANG DIHITUNG & DETEKSI VITAMIN -->
+      <div class="bg-white dark:bg-zinc-900 rounded-2xl p-5 shadow-sm border border-slate-200 dark:border-zinc-800 space-y-3">
+        <h3 class="font-extrabold text-xs text-slate-500 uppercase tracking-wider">Item Gizi Terkandung:</h3>
+        
+        <!-- Vitamin Box -->
+        <div class="bg-sky-50 dark:bg-sky-950/20 border border-sky-100 dark:border-sky-900/30 rounded-xl p-3 flex items-center justify-between">
+          <div class="flex items-center space-x-2">
+            <span class="text-xl">🧬</span>
+            <span class="text-xs font-bold text-sky-800 dark:text-sky-300">Daftar Vitamin Terdeteksi:</span>
+          </div>
+          <span class="text-xs font-extrabold text-sky-700 dark:text-sky-400 bg-sky-100 dark:bg-sky-950/80 px-3 py-1 rounded-lg" id="resVitamins">-</span>
+        </div>
+
+        <!-- Serat Box -->
+        <div class="bg-violet-50 dark:bg-violet-950/20 border border-violet-100 dark:border-violet-900/30 rounded-xl p-3 flex items-center justify-between">
+          <div class="flex items-center space-x-2">
+            <span class="text-xl">🌾</span>
+            <span class="text-xs font-bold text-violet-800 dark:text-violet-300">Serat Pangan Total:</span>
+          </div>
+          <span class="text-xs font-extrabold text-violet-700 dark:text-violet-400 bg-violet-100 dark:bg-violet-950/80 px-3 py-1 rounded-lg" id="resFiber">0 g</span>
+        </div>
+      </div>
+
+      <!-- SARAN PERBAIKAN REKOMENDASI EDUKATIF (Sesuai Butir 4) -->
+      <div class="bg-white dark:bg-zinc-900 rounded-2xl p-5 shadow-sm border border-slate-200 dark:border-zinc-800 space-y-3">
+        <h3 class="font-extrabold text-xs text-slate-500 uppercase tracking-wider">Rekomendasi / Saran Ahli Gizi:</h3>
+        <ul id="recommendationList" class="space-y-2 text-xs text-slate-600 dark:text-slate-300">
+          <!-- Rekomendasi di-render di sini -->
+        </ul>
+      </div>
+
+      <!-- DAFTAR LAUK DALAM KOTAK -->
+      <div class="bg-white dark:bg-zinc-900 rounded-2xl p-5 shadow-sm border border-slate-200 dark:border-zinc-800 space-y-3">
+        <h3 class="font-extrabold text-xs text-slate-500 uppercase tracking-wider">Menu Bekal Sekolah Terpilih:</h3>
+        <div id="resultsFoodList" class="space-y-2">
+          <!-- Item Makanan Terpilih di-render di sini -->
+        </div>
+      </div>
+
+      <!-- PANEL TOMBOL FITUR TAMBAHAN (Sesuai Butir 6) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
+        <!-- Simpan Riwayat -->
+        <button id="saveToHistoryBtn" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold p-3.5 rounded-xl shadow-md transition-all text-xs flex items-center justify-center space-x-2">
+          <i class="fa-solid fa-floppy-disk"></i>
+          <span>Simpan ke Riwayat Bekal 💾</span>
+        </button>
+        <!-- Export PDF -->
+        <button id="exportPdfBtn" class="bg-slate-800 dark:bg-zinc-800 hover:bg-slate-700 dark:hover:bg-zinc-700 text-white font-bold p-3.5 rounded-xl shadow-md transition-all text-xs flex items-center justify-center space-x-2">
+          <i class="fa-regular fa-file-pdf"></i>
+          <span>Cetak / Ekspor Laporan PDF 📄</span>
+        </button>
+      </div>
+
+      <!-- Button Selesai -->
+      <div class="pt-4 text-center">
+        <button id="finishAnalysisBtn" class="text-emerald-600 dark:text-emerald-400 hover:underline text-xs font-extrabold">
+          Selesai &amp; Kosongkan Kotak Bekal 📦
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL POPUP: TAMBAH LAUK BEKAL (PROMPT BERAT & PORSI) -->
+  <div id="addFoodModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-white dark:bg-zinc-900 w-full max-w-sm rounded-3xl p-6 space-y-4 shadow-2xl scale-95 transition-all">
+      <div class="text-center">
+        <span class="text-3xl" id="modalFoodIcon">🍚</span>
+        <h3 class="text-lg font-extrabold mt-2 text-slate-800 dark:text-slate-100" id="modalFoodName">Nasi Putih</h3>
+        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider" id="modalFoodCategory">Karbohidrat</span>
+      </div>
+
+      <!-- Field Input Berat -->
+      <div>
+        <label for="modalFoodWeight" class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Berat Makanan (Gram):</label>
+        <input type="number" id="modalFoodWeight" class="w-full bg-slate-50 dark:bg-zinc-800/80 border border-slate-200 dark:border-zinc-700 rounded-xl p-2.5 text-sm font-bold text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-emerald-500 focus:outline-none" value="100">
+        <!-- Preset Button Berat -->
+        <div class="flex gap-1.5 mt-2">
+          <button type="button" class="preset-weight-btn flex-1 py-1 text-[10px] font-bold bg-slate-100 dark:bg-zinc-800 rounded-md" data-weight="50">50g</button>
+          <button type="button" class="preset-weight-btn flex-1 py-1 text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 rounded-md" data-weight="100">100g</button>
+          <button type="button" class="preset-weight-btn flex-1 py-1 text-[10px] font-bold bg-slate-100 dark:bg-zinc-800 rounded-md" data-weight="150">150g</button>
+          <button type="button" class="preset-weight-btn flex-1 py-1 text-[10px] font-bold bg-slate-100 dark:bg-zinc-800 rounded-md" data-weight="200">200g</button>
+        </div>
+      </div>
+
+      <!-- Field Input Porsi -->
+      <div>
+        <label for="modalFoodPortion" class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Jumlah Porsi (Perkalian):</label>
+        <input type="number" id="modalFoodPortion" class="w-full bg-slate-50 dark:bg-zinc-800/80 border border-slate-200 dark:border-zinc-700 rounded-xl p-2.5 text-sm font-bold text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-emerald-500 focus:outline-none" value="1" step="0.5" min="0.5">
+        <!-- Preset Button Porsi -->
+        <div class="flex gap-1.5 mt-2">
+          <button type="button" class="preset-portion-btn flex-1 py-1 text-[10px] font-bold bg-slate-100 dark:bg-zinc-800 rounded-md" data-portion="1">1 Porsi</button>
+          <button type="button" class="preset-portion-btn flex-1 py-1 text-[10px] font-bold bg-teal-100 dark:bg-teal-950/40 text-teal-700 dark:text-teal-300 rounded-md" data-portion="1.5">1.5 Porsi</button>
+          <button type="button" class="preset-portion-btn flex-1 py-1 text-[10px] font-bold bg-slate-100 dark:bg-zinc-800 rounded-md" data-portion="2">2 Porsi</button>
+        </div>
+      </div>
+
+      <div class="flex space-x-2 pt-2 text-xs">
+        <button id="closeAddFoodModalBtn" class="flex-1 py-3 border border-slate-200 dark:border-zinc-700 text-slate-600 dark:text-slate-300 font-bold rounded-xl hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">
+          Batal
+        </button>
+        <button id="confirmAddFoodBtn" class="flex-[1.5] py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-md transition-colors">
+          Masukkan Kotak
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL POPUP: TAMBAH MAKANAN KUSTOM BARU -->
+  <div id="customFoodModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-white dark:bg-zinc-900 w-full max-w-md rounded-3xl p-6 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-200 dark:border-zinc-800 pb-2">
+        <h3 class="text-base font-extrabold text-slate-800 dark:text-slate-100 flex items-center space-x-1.5">
+          <span>Item Gizi Kustom</span>
+          <span>🍎</span>
+        </h3>
+        <button id="closeCustomFoodModalBtn" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <form id="customFoodForm" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-bold text-slate-500 mb-1">Nama Makanan:</label>
+          <input type="text" id="customName" class="w-full bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl p-2.5" placeholder="Contoh: Sosis Bakar" required>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-500 mb-1">Kategori:</label>
+          <select id="customCategory" class="w-full bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl p-2.5">
+            <option value="Karbohidrat">Karbohidrat</option>
+            <option value="Protein">Protein</option>
+            <option value="Sayuran">Sayuran</option>
+            <option value="Buah">Buah</option>
+            <option value="Minuman">Minuman</option>
+            <option value="Snack">Snack</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-bold text-slate-500 mb-1">Kalori (kkal/100g):</label>
+            <input type="number" id="customCalories" class="w-full bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl p-2.5" value="100" required>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-500 mb-1">Karbohidrat (g/100g):</label>
+            <input type="number" id="customCarbs" class="w-full bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl p-2.5" value="10" step="0.1" required>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-bold text-slate-500 mb-1">Protein (g/100g):</label>
+            <input type="number" id="customProtein" class="w-full bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl p-2.5" value="5" step="0.1" required>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-500 mb-1">Lemak (g/100g):</label>
+            <input type="number" id="customFat" class="w-full bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl p-2.5" value="2" step="0.1" required>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-bold text-slate-500 mb-1">Serat (g/100g):</label>
+            <input type="number" id="customFiber" class="w-full bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl p-2.5" value="0.5" step="0.1" required>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-500 mb-1">Vitamin Terkandung:</label>
+            <input type="text" id="customVitamin" class="w-full bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl p-2.5" placeholder="Contoh: B1, Zat Besi">
+          </div>
+        </div>
+
+        <div class="flex space-x-2 pt-3">
+          <button type="button" id="cancelCustomFoodBtn" class="flex-1 py-3 border border-slate-200 dark:border-zinc-700 text-slate-600 dark:text-slate-300 font-bold rounded-xl transition-colors">
+            Batal
+          </button>
+          <button type="submit" class="flex-[1.5] py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-md transition-colors">
+            Simpan Bahan Baru 💾
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- LOAD SCRIPTS SECARA BERURUTAN -->
+  <script src="database.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
