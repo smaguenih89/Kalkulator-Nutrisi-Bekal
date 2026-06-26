@@ -1,0 +1,5 @@
+# Konfigurasi Netlify untuk Kalkulator Nutrisi Bekal Sekolah
+
+[build]
+  # Folder yang berisi file HTML, CSS, dan JS utama untuk di-publish
+  publish = "KalkulatorNutrisi"

@@ -21,6 +21,18 @@ Netlify adalah cara termudah dan tercepat untuk meluncurkan aplikasi web Anda se
 4. **Tarik (Drag) & Lepas (Drop)** folder `KalkulatorNutrisi` tersebut ke dalam kotak unggahan yang tersedia di halaman Netlify Drop.
 5. Selesai! Netlify akan langsung memproses dan memberikan Anda tautan (URL) publik (misalnya `https://nama-unik-anda.netlify.app`) yang bisa diakses dari HP siswa maupun laptop guru di sekolah.
 
+### Metode 2: Deploy Otomatis via GitHub ke Netlify (Rekomendasi!)
+Karena Anda mendeploy via GitHub ke Netlify, kami sudah menyediakan file konfigurasi otomatis `netlify.toml` di root repositori Anda. 
+
+Berikut adalah langkah mudahnya:
+1. **Push seluruh repositori** ini ke akun GitHub Anda.
+2. Buka dashboard [Netlify](https://app.netlify.com/) Anda dan klik **Add new site** -> **Import an existing project**.
+3. Pilih penyedia layanan Git **GitHub** dan berikan izin akses ke repositori proyek Anda.
+4. Pilih repositori proyek Anda.
+5. Netlify akan **secara otomatis membaca file `netlify.toml`** di root repositori Anda. File tersebut menginstruksikan Netlify untuk menggunakan folder `KalkulatorNutrisi` sebagai direktori web utama yang akan di-publish (`publish = "KalkulatorNutrisi"`). Anda **tidak perlu mengisi atau mengubah pengaturan build lainnya** (kosongkan saja kolom Build Command).
+6. Klik **Deploy [nama-repositori]**.
+7. Selesai! Setiap kali Anda melakukan perubahan kode di GitHub, Netlify akan otomatis melakukan update (auto-deploy) dalam hitungan detik!
+
 ---
 
 ## 🛠️ Menjalankan Secara Lokal di Komputer
